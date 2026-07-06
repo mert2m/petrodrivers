@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { DifficultyBadge, Screen, Text } from '@/components/ui';
@@ -10,12 +11,11 @@ const LEGEND: Difficulty[] = ['easy', 'medium', 'technical', 'hairpin'];
  * (via features/map). Phase 0 shows the difficulty legend so the design language is visible.
  */
 export default function MapScreen() {
+  const { t } = useTranslation();
   return (
     <Screen edges={['top']} padded className="gap-4">
-      <Text variant="title">Roads near you</Text>
-      <Text className="text-fg-secondary">
-        The difficulty-colored map lands in Phase 2. Segments will be shaded by the legend below.
-      </Text>
+      <Text variant="title">{t('map.title')}</Text>
+      <Text className="text-fg-secondary">{t('map.phase2Note')}</Text>
       <View className="mt-2 flex-row flex-wrap gap-2">
         {LEGEND.map((d) => (
           <DifficultyBadge key={d} difficulty={d} />

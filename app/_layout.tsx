@@ -1,4 +1,5 @@
 import '../global.css';
+import '@/i18n'; // side-effect: initialize i18next (EN + TR) before the tree renders
 
 import { QueryClientProvider } from '@tanstack/react-query';
 import { Stack } from 'expo-router';

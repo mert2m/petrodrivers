@@ -1,4 +1,5 @@
 import { Stack, useLocalSearchParams } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 
 import { Screen, Text } from '@/components/ui';
 
@@ -9,13 +10,16 @@ import { Screen, Text } from '@/components/ui';
  */
 export default function RoadDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const { t } = useTranslation();
   return (
     <>
-      <Stack.Screen options={{ headerShown: true, title: 'Road', headerTransparent: true }} />
+      <Stack.Screen
+        options={{ headerShown: true, title: t('road.headerTitle'), headerTransparent: true }}
+      />
       <Screen padded className="gap-2">
-        <Text variant="title">Road detail</Text>
-        <Text className="text-fg-secondary">Road id: {id}</Text>
-        <Text className="text-fg-tertiary">Full detail page arrives in Phase 2.</Text>
+        <Text variant="title">{t('road.detailTitle')}</Text>
+        <Text className="text-fg-secondary">{t('road.roadId', { id })}</Text>
+        <Text className="text-fg-tertiary">{t('road.phase2')}</Text>
       </Screen>
     </>
   );

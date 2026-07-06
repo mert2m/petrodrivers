@@ -16,7 +16,8 @@ Reanimated v4 · Zod · Sentry.
 
 **Additions beyond the locked list (justified):** `react-native-worklets` (required peer of Reanimated
 v4); `react-dom` (SDK-required peer, pinned to match `react`); `@expo/vector-icons` (tab icons; no longer
-bundled by `expo`); `services/entitlements` no-op paywall seam; OpenWeather fallback + OpenTopoData/
+bundled by `expo`); `i18next` + `react-i18next` + `expo-localization` (Turkish + English support — see
+Internationalization); `services/entitlements` no-op paywall seam; OpenWeather fallback + OpenTopoData/
 Copernicus pipeline tooling (build-time only, not shipped). Add nothing else without a note here.
 
 **Deviation from spec:** spec said Reanimated **v3**; SDK 57 bundles **v4 + worklets** and v3 won't run
@@ -50,6 +51,17 @@ reach for tokens for imperative/animation code. Primitives in `src/components/ui
 
 Utility naming (palette groups use `DEFAULT`): `bg-surface`, `bg-surface-elevated`, `text-fg`,
 `text-fg-secondary`, `bg-accent`, `border-line`, `bg-difficulty-easy|medium|technical|hairpin`.
+
+## Internationalization (EN + TR)
+
+All user-facing copy goes through i18n — **no hardcoded UI strings in components**. Setup lives in
+`src/i18n`: `locales/en.ts` is the shape source of truth; `locales/tr.ts` is typed as a widened
+`typeof en`, so a missing/extra key is a compile error. `react-i18next.d.ts` augments `t()` for
+autocomplete + typo-safety. Device language is auto-detected (`expo-localization`); the user's choice
+persists in AsyncStorage and is switchable from the Profile tab (EN / Türkçe). Use it as:
+`const { t } = useTranslation(); t('map.title')`; interpolate with `t('road.roadId', { id })`. Init is a
+side-effect import of `@/i18n` at the top of `app/_layout.tsx`. A jest test asserts EN/TR key parity.
+When adding copy: add the key to `en.ts` first (compile forces the TR translation), never inline a string.
 
 ## Difficulty scoring (offline — spec §7)
 
@@ -93,7 +105,7 @@ version), superseding the research's 8.x guess. Remaining Sentry risk is just a 
 ## Known toolchain notes
 
 - **`expo install --fix` crashes** on this exact `@expo/cli` (57.0.2) build: `Cannot find module
-  './utils/autoAddConfigPlugins.js'`. It happens **after** versions are written to `package.json`, so the
+'./utils/autoAddConfigPlugins.js'`. It happens **after** versions are written to `package.json`, so the
   alignment still applies — only the config-plugin auto-add step fails. Add new deps with `npm install`
   (or `expo install <pkg>` may hit the same bug); revisit on the next `@expo/cli` patch.
 - **Native modules not in Expo Go:** `@rnmapbox/maps` (+ its config plugin) needs a dev build.
@@ -105,13 +117,15 @@ version), superseding the research's 8.x guess. Remaining Sentry risk is just a 
 - **Phase 0 (Foundation): DONE** — scaffold, theme/tokens, primitives, env (Zod), query client, services
   seams, CI, tests. Scoring pure-core implemented + tested. Migrations verified in PostGIS (15 tables /
   43 policies, idempotent). `database.ts` generated.
+- **i18n (EN + TR): DONE** — `src/i18n` with device detection + Profile language switcher; all screens
+  localized; EN/TR parity test. (37 tests green.)
 - Next: **Phase 1** — Supabase project wiring, seed 3–5 real roads through the pipeline, then ~50; typed
-  `roads` api + first React Query hooks.
+  `roads` api + first React Query hooks. (Needs a real Supabase project — URL + anon/service keys.)
 
 ## How to verify Phase 0
 
 `npm install` → `npm run typecheck` → `npm run lint` → `npm test` (all currently green: tsc 0, eslint 0,
-34 tests). DB: with Docker running, `npm run db:verify` (auto-starts a throwaway PostGIS container). Running
+37 tests). DB: with Docker running, `npm run db:verify` (auto-starts a throwaway PostGIS container). Running
 the app needs a dev build (`npx expo run:ios`/`run:android`) with a Mapbox token in `.env` — not Expo Go
 (`@rnmapbox/maps` is a native module). Note: `expo install --fix` aligns native versions but currently
 crashes at the plugin step on `@expo/cli` 57.0.2 (see Known toolchain notes) — versions are already pinned.

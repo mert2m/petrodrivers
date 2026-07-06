@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next';
 import { View } from 'react-native';
 
 import { cn } from '@/lib/cn';
@@ -10,13 +11,6 @@ export interface DifficultyBadgeProps {
   size?: 'sm' | 'md';
   className?: string;
 }
-
-const LABEL: Record<Difficulty, string> = {
-  easy: 'Easy',
-  medium: 'Medium',
-  technical: 'Technical',
-  hairpin: 'Hairpin',
-};
 
 // Filled pill in the segment color; text contrast + hairpin gets an outline (near-black on dark bg).
 const PILL: Record<Difficulty, string> = {
@@ -35,6 +29,7 @@ const TEXT: Record<Difficulty, string> = {
 
 /** Chip that colors a road/segment by difficulty. Same palette the map line layer uses. */
 export function DifficultyBadge({ difficulty, size = 'md', className }: DifficultyBadgeProps) {
+  const { t } = useTranslation();
   return (
     <View
       className={cn(
@@ -45,7 +40,7 @@ export function DifficultyBadge({ difficulty, size = 'md', className }: Difficul
       )}
     >
       <Text variant="caption" className={TEXT[difficulty]}>
-        {LABEL[difficulty]}
+        {t(`difficulty.${difficulty}`)}
       </Text>
     </View>
   );
