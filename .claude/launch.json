@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "expo",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "start"],
+      "port": 8081
+    },
+    {
+      "name": "supabase",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["supabase", "start"],
+      "port": 54321
+    }
+  ]
+}

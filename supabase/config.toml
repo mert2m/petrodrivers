@@ -1,0 +1,16 @@
+# Supabase CLI config. `supabase start` boots the local stack; `supabase db reset` applies migrations.
+project_id = "petrodrivers"
+
+[db]
+port = 54322
+major_version = 16
+
+[api]
+port = 54321
+schemas = ["public", "storage"]
+
+[studio]
+port = 54323
+
+[storage]
+enabled = true

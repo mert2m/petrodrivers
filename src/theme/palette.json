@@ -1,0 +1,51 @@
+{
+  "_comment": "SINGLE SOURCE of raw design values. Consumed by tailwind.config.js (require) AND src/theme/tokens.ts (import). Dark-mode only, orange accent. Groups use DEFAULT so utilities read cleanly: bg-surface, text-fg, border-line, bg-accent, bg-difficulty-easy.",
+  "colors": {
+    "surface": {
+      "DEFAULT": "#0A0A0B",
+      "base": "#0A0A0B",
+      "elevated": "#141416",
+      "glass": "rgba(20,20,22,0.6)",
+      "glassStrong": "rgba(20,20,22,0.82)"
+    },
+    "fg": {
+      "DEFAULT": "#F5F5F5",
+      "primary": "#F5F5F5",
+      "secondary": "#9A9AA0",
+      "tertiary": "#6A6A70",
+      "inverse": "#0A0A0B"
+    },
+    "accent": {
+      "DEFAULT": "#FF5A1F",
+      "muted": "#8A3312",
+      "soft": "rgba(255,90,31,0.14)"
+    },
+    "difficulty": {
+      "easy": "#34C759",
+      "medium": "#FFD60A",
+      "technical": "#FF3B30",
+      "hairpin": "#1A1A1E",
+      "hairpinOutline": "#4A4A52"
+    },
+    "line": {
+      "DEFAULT": "rgba(255,255,255,0.08)",
+      "hairline": "rgba(255,255,255,0.08)",
+      "strong": "rgba(255,255,255,0.16)"
+    },
+    "state": {
+      "success": "#34C759",
+      "warning": "#FFD60A",
+      "danger": "#FF3B30"
+    }
+  },
+  "radii": {
+    "xs": 6,
+    "sm": 10,
+    "md": 14,
+    "lg": 20,
+    "xl": 26,
+    "2xl": 34,
+    "pill": 999,
+    "full": 9999
+  }
+}
