@@ -17,8 +17,9 @@ Reanimated v4 · Zod · Sentry.
 **Additions beyond the locked list (justified):** `react-native-worklets` (required peer of Reanimated
 v4); `react-dom` (SDK-required peer, pinned to match `react`); `@expo/vector-icons` (tab icons; no longer
 bundled by `expo`); `i18next` + `react-i18next` + `expo-localization` (Turkish + English support — see
-Internationalization); `services/entitlements` no-op paywall seam; OpenWeather fallback + OpenTopoData/
-Copernicus pipeline tooling (build-time only, not shipped). Add nothing else without a note here.
+Internationalization); `services/entitlements` no-op paywall seam; `pg` + `@types/pg` + `tsx` +
+OpenWeather fallback + OpenTopoData/Copernicus pipeline tooling (build-time only, not shipped). Add
+nothing else without a note here.
 
 **Deviation from spec:** spec said Reanimated **v3**; SDK 57 bundles **v4 + worklets** and v3 won't run
 once worklets is installed. We ship **v4**. This is the only intentional stack override.
@@ -68,9 +69,14 @@ When adding copy: add the key to `en.ts` first (compile forces the TR translatio
 Colored segments come from the offline pipeline in `scripts/scoring`, NOT on-device. App only reads
 pre-scored `road_segments`. Tunable thresholds are a **single source**: `src/config/difficulty.ts`
 (`DIFFICULTY_THRESHOLDS_V0`), re-used by `scripts/scoring/config.ts` so app + pipeline never drift.
-Pure, tested core (implemented now): `scripts/scoring/{geo,classify}.ts`. IO stages
-(`io/{overpass,elevation,postgis}`) are interfaces stubbed for Phase 1. Curvature is fit on **projected
-metres** (`toPlanar`), never degrees; line is **resampled + smoothed before** any radius triplet.
+Curvature is fit on **projected metres** (`toPlanar`), never degrees; line is **resampled + smoothed
+before** any radius triplet. **Implemented + tested:** `geo`, `classify`, `metrics`, `records`, and
+`pipeline.scoreRoad` (GeoJSON source path) + the `pg` PostGIS writer (`io/postgis`, idempotent
+delete+reinsert). **Stubbed:** `io/overpass` (OSM ingestion) and `io/elevation` (OpenTopoData) — the
+GeoJSON path + optional-elevation seam mean gradient is simply `unknown` until those land. Seed +
+run: `DRY=1 npm run seed:roads` (score in memory, print distribution) then `DATABASE_URL=... npm run
+seed:roads` (write). Curated seeds live in `supabase/seed/curated-roads.ts` (synthetic sine serpentines
+that exercise each difficulty band; real iconic roads come via the OSM path).
 
 ## Backend / RLS notes
 
@@ -79,6 +85,17 @@ silently denies). Public read: `roads`, `road_segments`, `achievements`, curated
 NULL), plus `road_reports`/`comments`. Owner-only writes elsewhere; `vehicle_setups` ownership is
 **indirect** (setup → vehicle → user) via `EXISTS`. Storage owner-write keys off the first path segment:
 upload to `<bucket>/<uid>/<file>`. Buckets: `road-photos` (public read), `avatars`.
+
+**Map read RPCs (`0006_functions.sql`):** `segments_in_bbox` / `roads_in_bbox` return geometry as GeoJSON
+text (client parses + Zod-validates), and the viewport filter uses `geom && ST_MakeEnvelope(...)::geography`
+so the `road_segments_geom_gix` GIST index is hit (verified via `explain`). The roads feature reads through
+these via `src/features/roads/api` → `hooks/useRoads`.
+
+**Local DB gotchas** (baked into `scripts/db/verify-migrations.sh`): use the **arm64-native multi-arch**
+image `imresamu/postgis:16-3.4` (plain `postgis/postgis` is amd64-only → crashes under emulation on Apple
+Silicon); run with **`--shm-size=1g`** (PostGIS exits 3 loading under the default 64MB shm); and **wait for
+the image's init-complete marker** before applying migrations (its own PostGIS load races an early
+`pg_isready`, causing a duplicate-extension error).
 
 ## v2 seams (interfaces only — DO NOT implement)
 
@@ -118,9 +135,14 @@ version), superseding the research's 8.x guess. Remaining Sentry risk is just a 
   seams, CI, tests. Scoring pure-core implemented + tested. Migrations verified in PostGIS (15 tables /
   43 policies, idempotent). `database.ts` generated.
 - **i18n (EN + TR): DONE** — `src/i18n` with device detection + Profile language switcher; all screens
-  localized; EN/TR parity test. (37 tests green.)
-- Next: **Phase 1** — Supabase project wiring, seed 3–5 real roads through the pipeline, then ~50; typed
-  `roads` api + first React Query hooks. (Needs a real Supabase project — URL + anon/service keys.)
+  localized; EN/TR parity test.
+- **Phase 1 (data path): DONE locally** — pipeline completed (`metrics` + `records` + `pg` writer),
+  `scoreRoad` GeoJSON path, 3 curated roads seeded into local PostGIS end-to-end (9 hairpin / 11 technical
+  / 15 easy, GIST-indexed bbox GeoJSON RPC verified), `database.ts` regenerated with the RPCs, and typed
+  `roads` api + React Query hooks. 49 tests green.
+- **Phase 1 remaining:** point at a real Supabase project (URL + keys) so the api/hooks run live; implement
+  `io/overpass` (real OSM ingestion) + `io/elevation` (OpenTopoData) to replace synthetic seeds; scale to
+  the full ~50 roads. Cloud access is user-gated (dashboard is their session).
 
 ## How to verify Phase 0
 

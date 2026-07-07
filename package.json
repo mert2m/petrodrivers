@@ -15,7 +15,8 @@
     "test": "jest",
     "test:ci": "jest --ci --runInBand",
     "gen:types": "supabase gen types typescript --local > src/types/database.ts",
-    "db:verify": "bash scripts/db/verify-migrations.sh"
+    "db:verify": "bash scripts/db/verify-migrations.sh",
+    "seed:roads": "tsx scripts/seed-roads.ts"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.1.1",
@@ -56,11 +57,14 @@
     "eslint-config-expo": "~10.0.0",
     "jest": "^29.7.0",
     "jest-expo": "~57.0.0",
+    "pg": "^8.22.0",
+    "@types/pg": "^8.20.0",
     "prettier": "^3.4.2",
     "prettier-plugin-tailwindcss": "^0.6.11",
     "react-test-renderer": "19.2.3",
     "supabase": "^2.109.0",
     "tailwindcss": "^3.4.17",
+    "tsx": "^4.19.2",
     "typescript": "^5.9.2"
   },
   "engines": {
